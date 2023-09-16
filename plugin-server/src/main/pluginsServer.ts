@@ -192,6 +192,8 @@ export async function startPluginsServer(
         Sentry.captureException(error, {
             extra: { detected_at: `pluginServer.ts on unhandledRejection` },
         })
+
+        process.exit(1)
     })
 
     process.on('uncaughtException', async (error: Error) => {
