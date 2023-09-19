@@ -32,7 +32,7 @@ export interface NodeWrapperProps<T extends CustomNotebookNodeAttributes> {
     title: string | ((attributes: CustomNotebookNodeAttributes) => Promise<string>)
     nodeType: NotebookNodeType
     children?: ReactNode | ((isEdit: boolean, isPreview: boolean) => ReactNode)
-    href?: string | ((attributes: NotebookNodeAttributes<T>) => string)
+    href?: string | ((attributes: NotebookNodeAttributes<T>) => string | undefined)
 
     // Sizing
     expandable?: boolean
@@ -67,8 +67,8 @@ export function NodeWrapper<T extends CustomNotebookNodeAttributes>({
     widgets = [],
 }: NodeWrapperProps<T> & NotebookNodeViewProps<T>): JSX.Element {
     const mountedNotebookLogic = useMountedLogic(notebookLogic)
-    const { isEditable, isShowingSidebar } = useValues(mountedNotebookLogic)
-    const { setIsShowingSidebar } = useActions(mountedNotebookLogic)
+    const { isEditable, editingNodeId } = useValues(mountedNotebookLogic)
+    const { setEditingNodeId } = useActions(mountedNotebookLogic)
 
     // nodeId can start null, but should then immediately be generated
     const nodeId = attributes.nodeId
@@ -156,33 +156,37 @@ export function NodeWrapper<T extends CustomNotebookNodeAttributes>({
                                         <span className="flex-1 cursor-pointer">{title}</span>
                                     </LemonButton>
 
-                                    {parsedHref && <LemonButton size="small" icon={<IconLink />} to={parsedHref} />}
+                                    <div className="flex space-x-1">
+                                        {parsedHref && <LemonButton size="small" icon={<IconLink />} to={parsedHref} />}
 
-                                    {expandable && (
-                                        <LemonButton
-                                            onClick={() => setExpanded(!expanded)}
-                                            size="small"
-                                            icon={expanded ? <IconUnfoldLess /> : <IconUnfoldMore />}
-                                        />
-                                    )}
+                                        {expandable && (
+                                            <LemonButton
+                                                onClick={() => setExpanded(!expanded)}
+                                                size="small"
+                                                icon={expanded ? <IconUnfoldLess /> : <IconUnfoldMore />}
+                                            />
+                                        )}
 
-                                    {widgets.length > 0 ? (
-                                        <LemonButton
-                                            onClick={() => setIsShowingSidebar(!isShowingSidebar)}
-                                            size="small"
-                                            icon={<IconFilter />}
-                                            active={isShowingSidebar && selected}
-                                        />
-                                    ) : null}
+                                        {widgets.length > 0 ? (
+                                            <LemonButton
+                                                onClick={() =>
+                                                    setEditingNodeId(editingNodeId === nodeId ? null : nodeId)
+                                                }
+                                                size="small"
+                                                icon={<IconFilter />}
+                                                active={editingNodeId === nodeId}
+                                            />
+                                        ) : null}
 
-                                    {isEditable && (
-                                        <LemonButton
-                                            onClick={() => deleteNode()}
-                                            size="small"
-                                            status="danger"
-                                            icon={<IconClose />}
-                                        />
-                                    )}
+                                        {isEditable && (
+                                            <LemonButton
+                                                onClick={() => deleteNode()}
+                                                size="small"
+                                                status="danger"
+                                                icon={<IconClose />}
+                                            />
+                                        )}
+                                    </div>
                                 </div>
                                 <div
                                     ref={contentRef}
