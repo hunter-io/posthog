@@ -25,8 +25,8 @@ export type CustomNotebookNodeAttributes = Record<string, any>
 
 export type NotebookNodeAttributes<T extends CustomNotebookNodeAttributes> = T & {
     nodeId: string
-    title: string | ((attributes: T) => Promise<string>)
     height?: string | number
+    title: string
 }
 
 // NOTE: Pushes users to use the parsed "attributes" instead
@@ -63,7 +63,6 @@ export interface NotebookEditor {
     setSelection: (position: number) => void
     focus: (position: EditorFocusPosition) => void
     destroy: () => void
-    isEmpty: () => boolean
     deleteRange: (range: EditorRange) => EditorCommands
     insertContent: (content: JSONContent) => void
     insertContentAfterNode: (position: number, content: JSONContent) => void
